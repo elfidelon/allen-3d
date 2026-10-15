@@ -34,26 +34,44 @@
     #ui button { appearance: none; border: 0; background: transparent; color: var(--text); font: inherit;
       font-size: 13px; padding: 9px 12px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
     #ui button:hover { background: rgba(255, 255, 255, .08); }
-    #ui button[aria-pressed="true"] { background: var(--accent); color: #1a1205; font-weight: 600; }
+    #ui button[aria-pressed="true"] { background: rgba(255, 255, 255, .16); font-weight: 600; }
     #ui .sep { width: 1px; background: var(--line); margin: 4px 2px; }
 
-    #title { position: fixed; z-index: 10; top: 16px; left: 16px; font-size: 13px; letter-spacing: .08em;
-      text-transform: uppercase; font-weight: 600; text-shadow: 0 1px 6px rgba(0, 0, 0, .7); }
-    #hint { position: fixed; z-index: 10; top: 16px; right: 16px; max-width: 300px; text-align: right;
-      font-size: 12px; line-height: 1.5; color: var(--muted); text-shadow: 0 1px 6px rgba(0, 0, 0, .8); }
+    #title, #hint { position: fixed; z-index: 10; top: 16px; padding: 8px 12px; background: var(--panel);
+      border: 1px solid var(--line); border-radius: 10px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+    #title { left: 16px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; font-weight: 600; }
+    #hint { right: 16px; max-width: 320px; font-size: 12px; line-height: 1.5; color: var(--muted); }
+    #hint b { color: var(--text); }
     #crosshair { position: fixed; z-index: 10; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px;
       border-radius: 50%; background: rgba(255, 255, 255, .7); display: none; pointer-events: none; }
     body.walking #crosshair { display: block; }
     body.touch .desktop-only { display: none; }
 
-    /* Boton "Enter VR" que inyecta three.js: grande y visible para el Quest */
-    #VRButton { bottom: 80px !important; padding: 14px 22px !important; font-size: 15px !important;
-      font-weight: 700 !important; background: var(--accent) !important; color: #1a1205 !important;
-      border: 0 !important; border-radius: 10px !important; opacity: 1 !important; width: auto !important;
-      left: 50% !important; transform: translateX(-50%); }
-    #VRButton[disabled], #VRButton:not([style*="cursor: pointer"]) { background: rgba(255,255,255,.08) !important;
-      color: var(--muted) !important; font-weight: 500 !important; font-size: 12px !important; }
-    @media (max-width: 520px) { #hint { display: none; } }
+    /* Boton de VR: siempre visible; en lentes con WebXR va resaltado */
+    #ui #bVR { font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--accent); color: var(--accent); }
+    #ui #bVR svg { width: 18px; height: 18px; vertical-align: -4px; margin-right: 6px; }
+    body.vr-ok #ui #bVR { background: var(--accent); color: #1a1205; font-size: 15px; padding: 10px 18px; }
+
+    #vrHelp { position: fixed; inset: 0; z-index: 30; display: none; place-items: center; padding: 16px;
+      background: rgba(0, 0, 0, .55); }
+    #vrHelp.open { display: grid; }
+    #vrHelp .card { width: min(400px, 100%); background: #171a1f; border: 1px solid var(--line); border-radius: 14px;
+      padding: 22px; line-height: 1.5; }
+    #vrHelp h2 { margin: 0 0 10px; font-size: 17px; }
+    #vrHelp ol { margin: 0 0 14px; padding-left: 20px; font-size: 14px; color: var(--muted); }
+    #vrHelp ol b { color: var(--text); }
+    #vrHelp .url { display: block; padding: 10px 12px; margin-bottom: 14px; background: rgba(255, 255, 255, .06);
+      border-radius: 8px; font: 600 14px ui-monospace, Menlo, monospace; color: var(--accent); word-break: break-all; }
+    #vrHelp .err { font-size: 12px; color: #ff8a7a; margin: -6px 0 12px; }
+    #vrHelp .row { display: flex; gap: 8px; justify-content: flex-end; }
+    #vrHelp button { appearance: none; border: 0; font: inherit; font-size: 13px; padding: 9px 14px; border-radius: 8px;
+      cursor: pointer; background: rgba(255, 255, 255, .08); color: var(--text); }
+    #vrHelp button.primary { background: var(--accent); color: #1a1205; font-weight: 600; }
+    @media (max-width: 520px) {
+      #hint, #ui .sep, #ui .long { display: none; }
+      #ui { left: 16px; right: 16px; transform: none; max-width: none; }
+      #ui #bVR { flex-basis: 100%; }
+    }
   </style>
   <script type="importmap">
     { "imports": {
@@ -73,12 +91,31 @@
   <div id="hint"></div>
   <div id="crosshair"></div>
 
+  <div id="vrHelp" role="dialog" aria-modal="true" aria-labelledby="vrHelpTitle"><div class="card">
+    <h2 id="vrHelpTitle">Ver en lentes VR</h2>
+    <p class="err" id="vrErr" hidden></p>
+    <ol>
+      <li>Ponte tus <b>Meta Quest</b> y abre el <b>Navegador</b> (Meta Browser).</li>
+      <li>Entra a esta dirección:</li>
+    </ol>
+    <span class="url" id="vrUrl"></span>
+    <ol start="3">
+      <li>Cuando cargue, pulsa <b>Entrar a VR</b>.</li>
+    </ol>
+    <div class="row">
+      <button id="bCopy">Copiar link</button>
+      <button id="bClose" class="primary">Entendido</button>
+    </div>
+  </div></div>
+
   <div id="ui">
+    <button id="bVR"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3.5l-2-3h-3l-2 3H5a2 2 0 0 1-2-2z"/><circle cx="8" cy="11.5" r="1.5"/><circle cx="16" cy="11.5" r="1.5"/></svg>Entrar a VR</button>
+    <span class="sep"></span>
     <button id="bOrbit" aria-pressed="true">Orbitar</button>
     <button id="bWalk" class="desktop-only" aria-pressed="false">Caminar</button>
     <span class="sep"></span>
     <button id="bQuality">Calidad: alta</button>
-    <button id="bReset">Reiniciar vista</button>
+    <button id="bReset">Reiniciar<span class="long"> vista</span></button>
   </div>
 
   <script type="module">
@@ -87,7 +124,6 @@
     import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-    import { VRButton } from 'three/addons/webxr/VRButton.js';
     import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
 
     // El origen del modelo es el punto donde se hizo la captura. Se sube a la
@@ -185,7 +221,7 @@
     const hint = document.getElementById('hint');
     function updateHint() {
       hint.innerHTML = isQuest
-        ? 'Pulsa <b>ENTER VR</b>. Stick izquierdo: moverte · Stick derecho: girar y subir/bajar · A: volver al inicio'
+        ? 'Pulsa <b>Entrar a VR</b>. Stick izquierdo: moverte · Stick derecho: girar y subir/bajar · A: volver al inicio'
         : mode === 'walk'
           ? 'WASD para moverte · Q/E bajar/subir · Shift corre · Esc para salir'
           : isTouch
@@ -244,15 +280,49 @@
       rig.rotation.set(0, VR_YAW, 0);
     }
 
-    if ('xr' in navigator) {
-      document.body.appendChild(VRButton.createButton(renderer, { optionalFeatures: ['local-floor', 'bounded-floor'] }));
-      renderer.xr.addEventListener('sessionstart', () => {
-        walk.unlock();
-        orbit.enabled = false;
-        vrStartPose();
-      });
-      renderer.xr.addEventListener('sessionend', () => { setMode('orbit'); resetView(); });
+    renderer.xr.addEventListener('sessionstart', () => {
+      walk.unlock();
+      orbit.enabled = false;
+      vrStartPose();
+    });
+    renderer.xr.addEventListener('sessionend', () => { setMode('orbit'); resetView(); });
+
+    // Boton "Entrar a VR": abre la sesion inmersiva o explica como abrirlo en los lentes
+    const bVR = document.getElementById('bVR');
+    const vrHelp = document.getElementById('vrHelp');
+    const vrErr = document.getElementById('vrErr');
+    const shareUrl = location.origin + location.pathname;
+    document.getElementById('vrUrl').textContent = shareUrl.replace(/^https?:\/\//, '');
+    let vrSupported = false;
+
+    navigator.xr?.isSessionSupported('immersive-vr').then(ok => {
+      vrSupported = ok;
+      document.body.classList.toggle('vr-ok', ok);
+    }).catch(() => {});
+
+    function openHelp(error) {
+      vrErr.hidden = !error;
+      vrErr.textContent = error ? 'No se pudo abrir VR: ' + error : '';
+      vrHelp.classList.add('open');
     }
+    document.getElementById('bClose').onclick = () => vrHelp.classList.remove('open');
+    vrHelp.onclick = e => { if (e.target === vrHelp) vrHelp.classList.remove('open'); };
+    document.getElementById('bCopy').onclick = async e => {
+      try { await navigator.clipboard.writeText(shareUrl); e.target.textContent = 'Copiado ✓'; }
+      catch { e.target.textContent = 'Copia el link de arriba'; }
+    };
+
+    bVR.onclick = async () => {
+      if (!vrSupported) return openHelp(window.isSecureContext ? '' : 'la página necesita HTTPS');
+      try {
+        const session = await navigator.xr.requestSession('immersive-vr',
+          { optionalFeatures: ['local-floor', 'bounded-floor'] });
+        await renderer.xr.setSession(session);
+      } catch (err) {
+        console.error(err);
+        openHelp(err.message || String(err));
+      }
+    };
 
     const up = new THREE.Vector3(0, 1, 0);
     const head = new THREE.Vector3(), fwd = new THREE.Vector3(), side = new THREE.Vector3();

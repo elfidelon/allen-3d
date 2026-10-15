@@ -8,7 +8,7 @@ Entorno 3D capturado (`allen.ply`) montado en la web con three.js + WebXR para v
 
 | Dónde | Control |
 |---|---|
-| Meta Quest | **Enter VR** · stick izquierdo moverse (gatillo = correr) · stick derecho girar 30° y subir/bajar · **A** volver al inicio |
+| Meta Quest | **Entrar a VR** · stick izquierdo moverse (gatillo = correr) · stick derecho girar 30° y subir/bajar · **A** volver al inicio |
 | PC | Orbitar: arrastrar / rueda / clic derecho · Caminar: WASD, Q/E, Shift |
 | Celular | Arrastrar, pellizcar, dos dedos |
 
